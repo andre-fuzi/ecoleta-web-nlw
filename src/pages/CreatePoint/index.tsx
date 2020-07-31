@@ -9,6 +9,8 @@ import { LeafletMouseEvent } from 'leaflet'
 import { api, apiUFs, apiCitys } from '../../services/api'
 /* eslint-enable no-unused-vars */
 
+import Dropzone from '../../components/Dropzone'
+
 import './style.css'
 import logo from '../../assets/logo.svg'
 
@@ -32,6 +34,7 @@ const CreatePoint = () => {
   const [selectedCity, setSelectedCity] = useState<string>('0')
   const [selectedMapPosition, setSelectedMapPosition] = useState<[number, number]>([0, 0])
   const [selectedItems, setSelectedItems] = useState<number[]>([])
+  const [selectedFile, setSelectedFile] = useState<File>()
 
   const history = useHistory()
 
@@ -115,15 +118,18 @@ const CreatePoint = () => {
     const city = selectedCity
     const [latitude, longitude] = selectedMapPosition
 
-    const data = {
-      name,
-      email,
-      whatsapp,
-      uf,
-      city,
-      latitude,
-      longitude,
-      items: selectedItems,
+    const data = new FormData()
+
+    data.append('name', name)
+    data.append('email', email)
+    data.append('whatsapp', whatsapp)
+    data.append('uf', uf)
+    data.append('city', city)
+    data.append('latitude', String(latitude))
+    data.append('longitude', String(longitude))
+    data.append('items', selectedItems.join(','))
+    if (selectedFile) {
+      data.append('image', selectedFile)
     }
 
     await api.post('collect-points', data)
@@ -145,6 +151,7 @@ const CreatePoint = () => {
       </header>
       <form onSubmit={handleSubmit}>
         <h1>Cadastro do <br /> Ponto de Coleta </h1>
+        <Dropzone onFileUploaded={setSelectedFile} />
         <fieldset>
           <legend>
             <h2>Dados</h2>
